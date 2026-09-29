@@ -1,4 +1,6 @@
 using System.Data;
+using System.Data.Common;
+using System.Numerics;
 using MySqlConnector;
 
 namespace  todo;
@@ -15,7 +17,7 @@ public class ToDoItemDao
     public List<ToDoItem> LoadData()
     {
         List<ToDoItem> toDoItems = new List<ToDoItem>();
-        string query = "SELECT * FROM todolist";
+        string query = "SELECT * FROM todo";
 
         foreach (DataRow row in Select(query).Rows)
         {
@@ -26,19 +28,23 @@ public class ToDoItemDao
     }
 
     public void SaveData(List<ToDoItem> toDoItems)
-    {
+    {   
+        DeleteData(toDoItems);
         foreach (ToDoItem todoItem in toDoItems)
         {
-            string query = string.Format("INSERT INTO todolist VALUES(0, '{0}', {1})", todoItem.Description, todoItem.IsDone);
-            Insert(query);
+            if (todoItem.Id == 0)
+            {
+                string query = string.Format("INSERT INTO todo VALUES(0, '{0}', {1})", todoItem.Description, todoItem.IsDone);
+                Insert(query);
+            }
         }
     }
-
     private ToDoItem GetDtoFromDataRow(DataRow row)
     {
         return new ToDoItem {
             Description = Convert.ToString(row["Description"]),
-            IsDone = Convert.ToBoolean(row["IsDone"])
+            IsDone = Convert.ToBoolean(row["IsDone"]),
+            Id = Convert.ToInt16(row["Id"])
         };
     }
 
@@ -78,5 +84,16 @@ public class ToDoItemDao
             Console.WriteLine(ex.ToString());
         }
         connection.Close();
+    }
+    private void DeleteData(List<ToDoItem> toDoItems)
+    {
+        foreach (DataRow row in Select("SELECT * FROM todo").Rows)
+        {   
+            int id = GetDtoFromDataRow(row).Id;
+            if (!toDoItems.Any(t => t.Id == id) & id != 0)
+            {
+                    Insert($"DELETE FROM todo WHERE Id={id}");
+            }
+        }       
     }
 }
