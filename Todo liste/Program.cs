@@ -5,7 +5,6 @@ namespace todo;
 
 class Program
 {
-    // TODO: Einträge abhaken (als erledigt markieren)
     // TODO: Einträge in Datenbank verwalten
     static void Main(string[] args)
     {
@@ -20,7 +19,6 @@ class Program
 
         ToDoItemDao dao = new ToDoItemDao(connection);
         todo = dao.LoadData();
-
         // if (File.Exists(file))
         // {
         //     try
@@ -50,13 +48,13 @@ class Program
                     completetodo(todo);
                     break;
                 case "d":
-                    Removetodo(todo);
+                    Removetodo(todo,dao);
                     break;
                 case "x":
                     exit = true;
                     break;
                 case "s":
-                    safetodo(todo, file);
+                    safetodo(todo, file,dao);
                     break;
                 default:
                     break;
@@ -64,7 +62,7 @@ class Program
         }
     }
 
-    static void Removetodo(List<ToDoItem> todo)
+    static void Removetodo(List<ToDoItem> todo, ToDoItemDao dao)
     {
         Viewtodo(todo);
 
@@ -81,7 +79,6 @@ class Program
             LogError("Der zu löschende Eintrag existiert nicht!");
             return;
         }
-
         todo.RemoveAt(index.Value - 1);
     }
 
@@ -119,7 +116,7 @@ class Program
             Console.WriteLine($"{i + 1}. {todo[i]}");
         }
 
-        Console.WriteLine($"Max. {todo.Count}");
+        Console.WriteLine("Max. 32,767");
     }
 
     static void Addtodo(List<ToDoItem> todo)
@@ -133,12 +130,13 @@ class Program
             return;
         }
 
-        todo.Add(new ToDoItem { Description = input, IsDone = false });
+        todo.Add(new ToDoItem { Id = 0, Description = input, IsDone = false });
     }
-    static void safetodo(List<ToDoItem> todo, string file)
+    static void safetodo(List<ToDoItem> todo, string file,ToDoItemDao dao)
     {
-        string json = JsonSerializer.Serialize(todo);
-        File.WriteAllText(file, json);
+        dao.SaveData(todo);
+        //string json = JsonSerializer.Serialize(todo);
+        //File.WriteAllText(file, json);
     }
     // static string addcheckbox(string input, bool complete = false)
     // {
@@ -159,7 +157,7 @@ class Program
     {
         Viewtodo(todo);
 
-        Console.WriteLine("enter todo ID to remove");
+        Console.WriteLine("enter todo ID to edit");
         int? i = ReadIntegerFromConsole();
         if (i == null)
         {
@@ -172,10 +170,8 @@ class Program
             return;
         }
         int idx = i ?? 0;
-        // string target = todo[idx-1];
-        // target = target.Replace("[ ]", "[X]");
+         // string target = todo[idx-1];
+        // target = target.Replace("[ ]", "[X]"); 
         todo[idx - 1].MarkAsDone();
     }
 }
-
-//lst[1] elemet [-1] = X
