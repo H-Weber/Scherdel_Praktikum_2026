@@ -5,7 +5,8 @@
  mit HTML und Bootstrap framework
 
 ### Todo liste
- noch nicht Fertig!
+
  mit C# geschrieben
+ 
  speichert todos in Datenbank
  
